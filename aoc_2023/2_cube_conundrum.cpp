@@ -21,7 +21,6 @@ int processGame(const std::string& line) {
     int count;
     std::string color;
     while (std::getline(s, set, ';')) {
-        // std::cout << "Processing set: " << set << std::endl;
         std::istringstream ss(set);
         do {
             ss >> count >> color;
@@ -30,7 +29,6 @@ int processGame(const std::string& line) {
         } while (color[color.length()-1] == ',');
     }
 
-    // std::cout << "Game is good\n";
     return gameNumber;
 }
 
@@ -44,9 +42,5 @@ int main(int argc, char* argv[]) {
         result += processGame(line);
     }
     std::cout << result << std::endl;
-
-    // auto line  = "Game 2: 3 blue, 1 green, 2 red; 2 red, 2 green, 5 blue; 3 green, 10 blue; 8 red, 1 blue; 3 red, 1 green, 5 blue; 1 blue, 5 red, 3 green";
-    // std::cout << processGame(line);
-
     return 0;
 }
