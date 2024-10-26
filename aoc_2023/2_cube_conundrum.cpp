@@ -10,6 +10,7 @@ std::unordered_map<char, int> bagContents {
     {'b', 14}
 };
 
+// part 1
 int processGame(const std::string& line) {
     std::istringstream s(line);
     std::string placeholder, set;
@@ -32,15 +33,46 @@ int processGame(const std::string& line) {
     return gameNumber;
 }
 
+// part 2
+int getGamePower(const std::string& line) {
+    std::istringstream s(line);
+    std::string placeholder, set;
+    int gameNumber;
+
+    // read game number
+    s >> placeholder >> gameNumber >> placeholder;
+
+    std::unordered_map<char, int> minimumCubesRequired {
+        {'r', 0},
+        {'g', 0},
+        {'b', 0}
+    };
+
+    int count;
+    std::string color;
+    while (std::getline(s, set, ';')) {
+        std::istringstream ss(set);
+        do {
+            ss >> count >> color;
+            minimumCubesRequired[color[0]] = std::max(count, minimumCubesRequired[color[0]]);
+        } while (color[color.length()-1] == ',');
+    }
+
+    return minimumCubesRequired['r']*minimumCubesRequired['g']*minimumCubesRequired['b'];
+}
+
+
 int main(int argc, char* argv[]) {
 
     std::fstream file("data/input_2_cube_conundrum.txt", std::ios::in);
-    int result = 0;
+    int possibleGames = 0;
+    int sumOfPowers = 0;
     std::string line;
     while (std::getline(file, line)) {
-        std::cout << line << std::endl;
-        result += processGame(line);
+        possibleGames += processGame(line);
+        sumOfPowers += getGamePower(line);
     }
-    std::cout << result << std::endl;
+    std::cout << "Part 1: " << possibleGames << std::endl;
+    std::cout << "Part 2: " << sumOfPowers << std::endl;
     return 0;
 }
