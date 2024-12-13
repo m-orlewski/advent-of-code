@@ -29,7 +29,7 @@ def count_trails(x, y, found):
     return len(set(found)), len(found)
  
 if __name__ == '__main__':
-    with open('data.txt') as f:
+    with open('data/day_10_data.txt') as f:
         for i, line in enumerate(f):
             tiles.append([])
             for j, c in enumerate(line.strip()):

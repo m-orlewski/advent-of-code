@@ -21,7 +21,7 @@ def blink(counter):
     return new_counter
  
 if __name__ == '__main__':
-    with open('data.txt') as f:
+    with open('data/day_11_data.txt') as f:
         for line in f:
             counter = Counter(list(map(int, line.strip().split(' '))))
  

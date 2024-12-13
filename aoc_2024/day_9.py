@@ -68,7 +68,7 @@ def optimize_file_blocks_2(file_blocks, counter, empty_segments):
  
  
 if __name__ == '__main__':
-    with open('data.txt') as file:
+    with open('data/day_9_data.txt') as file:
         data = file.read().strip()
         disk_map = [int(c) for c in data]
  
