@@ -45,6 +45,51 @@ func (h *DistanceHeap) Pop() any {
 	return x
 }
 
+type UnionFind struct {
+	parent []int
+	size   []int
+}
+
+func (uf *UnionFind) Find(x int) int {
+	if uf.parent[x] != x {
+		uf.parent[x] = uf.Find(uf.parent[x])
+	}
+
+	return uf.parent[x]
+}
+
+func (uf *UnionFind) Union(a, b int) int {
+	rootA := uf.Find(a)
+	rootB := uf.Find(b)
+
+	if rootA == rootB {
+		return uf.size[rootA]
+	}
+
+	if uf.size[rootA] < uf.size[rootB] {
+		rootA, rootB = rootB, rootA
+	}
+
+	uf.parent[rootB] = rootA
+	uf.size[rootA] += uf.size[rootB]
+	return uf.size[rootA]
+}
+
+func NewUnionFind(n int) *UnionFind {
+	parent := make([]int, n)
+	size := make([]int, n)
+
+	for i := 0; i < n; i++ {
+		parent[i] = i
+		size[i] = 1
+	}
+
+	return &UnionFind{
+		parent: parent,
+		size:   size,
+	}
+}
+
 func main() {
 	data, err := os.ReadFile("day_8/data.txt")
 	if err != nil {
@@ -82,64 +127,27 @@ func main() {
 		}
 	}
 
-	nextId := 1
 	connectionsCount := 0
-	// maps circuitId -> indices of boxes in it
-	circuits := map[int][]int{}
-	// maps circuitId -> count of boxes in it
-	circuitCounts := map[int]int{}
-	// maps box index -> circuit id it's in
-	boxCircuits := map[int]int{}
+	uf := NewUnionFind(len(boxes))
 	for distanceHeap.Len() > 0 {
 		distance := heap.Pop(distanceHeap).(Distance)
 
 		i := distance.i
 		j := distance.j
 
-		c1, ok1 := boxCircuits[i]
-		c2, ok2 := boxCircuits[j]
-
-		// 2) neither box is in a circuit
-		if !ok1 && !ok2 {
-			circuits[nextId] = append(circuits[nextId], i, j)
-			circuitCounts[nextId] = len(circuits[nextId])
-			boxCircuits[i] = nextId
-			boxCircuits[j] = nextId
-			nextId++
-		} else if !ok1 {
-			circuits[c2] = append(circuits[c2], i)
-			circuitCounts[c2] = len(circuits[c2])
-			boxCircuits[i] = c2
-		} else if !ok2 {
-			circuits[c1] = append(circuits[c1], j)
-			circuitCounts[c1] = len(circuits[c1])
-			boxCircuits[j] = c1
-		} else if ok1 && ok2 {
-			// merge 2 circuits
-			if c1 != c2 {
-				circuits[c1] = append(circuits[c1], circuits[c2]...)
-				circuitCounts[c1] = len(circuits[c1])
-				for _, boxId := range circuits[c2] {
-					boxCircuits[boxId] = c1
-				}
-				delete(circuits, c2)
-				delete(circuitCounts, c2)
-			}
+		sizeAfterUnion := uf.Union(i, j)
+		if sizeAfterUnion == len(boxes) {
+			fmt.Println("Part 2: ", boxes[i].x*boxes[j].x)
+			break
 		}
 
 		connectionsCount++
 		if connectionsCount == 1000 {
-			break
+			circuitSizes := append([]int{}, uf.size...)
+			slices.SortFunc(circuitSizes, func(a, b int) int {
+				return b - a
+			})
+			fmt.Println("Part 1: ", circuitSizes[0]*circuitSizes[1]*circuitSizes[2])
 		}
 	}
-
-	counts := []int{}
-	for _, v := range circuitCounts {
-		counts = append(counts, v)
-	}
-	slices.SortFunc(counts, func(x, y int) int {
-		return y - x
-	})
-
-	fmt.Println("Part 1: ", counts[0]*counts[1]*counts[2])
 }
