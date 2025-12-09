@@ -74,6 +74,7 @@ func pointInPolygon(p Coord, poly Polygon) bool {
 }
 
 func edgesIntersect(e1, e2 Edge) bool {
+	// counter clock-wise method
 	ccw := func(a, b, c Coord) int {
 		return (b.x-a.x)*(c.y-a.y) - (b.y-a.y)*(c.x-a.x)
 	}
@@ -87,32 +88,6 @@ func edgesIntersect(e1, e2 Edge) bool {
 		((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))
 }
 
-func polygonEdgeCrossesRectangle(r, p Edge) bool {
-	minX, maxX := min(r[0].x, r[1].x), max(r[0].x, r[1].x)
-	minY, maxY := min(r[0].y, r[1].y), max(r[0].y, r[1].y)
-
-	// polygon edge is entirely outside of rectangle
-	if (p[0].x < minX && p[1].x < minX) || (p[0].x > maxX && p[1].x > maxX) ||
-		(p[0].y < minY && p[1].y < minY) || (p[0].y > maxY && p[1].y > maxY) {
-		return false
-	}
-
-	rectEdges := []Edge{
-		{{x: minX, y: minY}, {x: maxX, y: minY}}, // bottom
-		{{x: maxX, y: minY}, {x: maxX, y: maxY}}, // right
-		{{x: maxX, y: maxY}, {x: minX, y: maxY}}, // top
-		{{x: minX, y: maxY}, {x: minX, y: minY}}, // left
-	}
-
-	for _, edge := range rectEdges {
-		if edgesIntersect(Edge{p[0], p[1]}, edge) {
-			return true
-		}
-	}
-
-	return false
-}
-
 func checkIfRectangleInPolygon(rect Rectangle, poly Polygon) bool {
 	// 1) check if each corner of rectangle is withing the polygon
 	for _, edge := range rect {
@@ -121,10 +96,10 @@ func checkIfRectangleInPolygon(rect Rectangle, poly Polygon) bool {
 		}
 	}
 
-	// 2) check if any edges cross each other
+	// 2) check if any edges intersect
 	for _, r := range rect {
 		for _, p := range poly {
-			if polygonEdgeCrossesRectangle(r, p) {
+			if edgesIntersect(p, r) {
 				return false
 			}
 		}
